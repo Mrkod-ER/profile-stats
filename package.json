@@ -1,0 +1,51 @@
+{
+  "name": "profile-stats",
+  "version": "0.1.0",
+  "description": "Fetch competitive programming stats from Codeforces, LeetCode, CodeChef, and GeeksforGeeks",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "cpstat": "./dist/cli/index.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "prepublishOnly": "npm run build",
+    "test": "npm run build && node test.mjs"
+  },
+  "keywords": [
+    "codeforces",
+    "leetcode",
+    "codechef",
+    "geeksforgeeks",
+    "competitive-programming",
+    "cp",
+    "stats"
+  ],
+  "author": "Mrkod-ER <abhisheksinghdev5@gmail.com>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "cheerio": "^1.2.0",
+    "cli-table3": "^0.6.5",
+    "commander": "^14.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.1",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  }
+}
