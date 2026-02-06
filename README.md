@@ -1,4 +1,4 @@
-# profile-sdk
+# profile-stats
 
 > Fetch competitive programming stats from Codeforces, LeetCode, CodeChef, and GeeksforGeeks
 
@@ -17,13 +17,13 @@ A lightweight TypeScript SDK to fetch competitive programming statistics from mu
 ## Installation
 
 ```bash
-npm install profile-sdk
+npm install profile-stats
 ```
 
 ## Quick Start
 
 ```typescript
-import { getAllStats } from 'profile-sdk';
+import { getAllStats } from 'profile-stats';
 
 const stats = await getAllStats({
   codeforces: 'tourist',
@@ -44,7 +44,7 @@ if (stats.codeforces?.success) {
 Fetch stats from all specified platforms in parallel.
 
 ```typescript
-import { getAllStats } from 'profile-sdk';
+import { getAllStats } from 'profile-stats';
 
 const stats = await getAllStats(
   {
@@ -70,7 +70,7 @@ const stats = await getAllStats(
 ### Individual Platform Functions
 
 ```typescript
-import { getCodeforces, getLeetCode, getCodeChef, getGfG } from 'profile-sdk';
+import { getCodeforces, getLeetCode, getCodeChef, getGfG } from 'profile-stats';
 
 // Fetch individual platforms
 const cf = await getCodeforces('tourist');
@@ -84,7 +84,7 @@ const gfg = await getGfG('user123');
 For advanced users who need raw API responses:
 
 ```typescript
-import { getCodeforcesRaw, getLeetCodeRaw } from 'profile-sdk';
+import { getCodeforcesRaw, getLeetCodeRaw } from 'profile-stats';
 
 const rawCf = await getCodeforcesRaw('tourist');
 const rawLc = await getLeetCodeRaw('neal_wu');
@@ -151,7 +151,7 @@ const rawLc = await getLeetCodeRaw('neal_wu');
 
 ```tsx
 // app/page.tsx
-import { getAllStats } from 'profile-sdk';
+import { getAllStats } from 'profile-stats';
 
 export default async function ProfilePage() {
   const stats = await getAllStats({
@@ -177,7 +177,7 @@ export default async function ProfilePage() {
 
 ```typescript
 // app/api/profile/route.ts
-import { getAllStats } from 'profile-sdk';
+import { getAllStats } from 'profile-stats';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
@@ -196,7 +196,7 @@ export async function GET() {
 
 ```typescript
 // app/api/cron/update-stats/route.ts
-import { getAllStats } from 'profile-sdk';
+import { getAllStats } from 'profile-stats';
 import { kv } from '@vercel/kv';
 
 export async function GET() {
