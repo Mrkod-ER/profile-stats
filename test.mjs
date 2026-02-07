@@ -4,10 +4,10 @@ async function test() {
     console.log('Testing All Platforms...');
     const result = await getAllStats(
         {
-            codeforces: 'tourist',
-            leetcode: 'neal_wu',
-            codechef: 'tourist',
-            gfg: 'shashank21j'
+            codeforces: 'koderabhishek',
+            leetcode: 'Mrkod-ER',
+            codechef: 'king_koder',
+            gfg: 'koderabhishek'
         },
         { timeout: 25000 }
     );

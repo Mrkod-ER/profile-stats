@@ -96,6 +96,7 @@ interface CodeChefStats {
     maxRating: number;
     stars: number;
     solved: number;
+    contests?: number;
     globalRank?: number;
     countryRank?: number;
     avatar: string;

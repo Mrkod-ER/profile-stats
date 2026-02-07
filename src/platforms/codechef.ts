@@ -29,8 +29,8 @@ export async function getCodeChef(
         const rating = parseInt(ratingText) || 0;
 
         // Extract max rating
-        const maxRatingText = $('.rating-header .small').text();
-        const maxRatingMatch = maxRatingText.match(/Highest Rating (\d+)/);
+        const ratingHeader = $('.rating-header').text();
+        const maxRatingMatch = ratingHeader.match(/Highest Rating\s*(\d+)/i);
         const maxRating = maxRatingMatch ? parseInt(maxRatingMatch[1]) : rating;
 
         // Extract stars
@@ -38,8 +38,15 @@ export async function getCodeChef(
         const stars = starsText || 0;
 
         // Extract solved count
-        const solvedText = $('section.rating-data-section.problems-solved h3').text().trim();
-        const solved = parseInt(solvedText) || 0;
+        // Look for h3 containing "Total Problems Solved"
+        const solvedHeader = $('h3:contains("Total Problems Solved")').text();
+        const solvedMatch = solvedHeader.match(/Total Problems Solved:\s*(\d+)/i);
+        const solved = solvedMatch ? parseInt(solvedMatch[1]) : 0;
+
+        // Extract contests count
+        const contestsHeader = $('h3:contains("Contests")').text();
+        const contestsMatch = contestsHeader.match(/Contests\s*\((\d+)\)/i);
+        const contests = contestsMatch ? parseInt(contestsMatch[1]) : 0;
 
         // Extract global rank
         const globalRankText = $('.rating-ranks ul li').first().find('.rank').text().trim();
@@ -59,6 +66,7 @@ export async function getCodeChef(
             maxRating,
             stars,
             solved,
+            contests,
             globalRank,
             countryRank,
             avatar: avatar || `${BASE_URL}/misc/default-profile-image.png`,

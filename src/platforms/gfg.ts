@@ -15,67 +15,49 @@ export async function getGfG(
     const timeout = options.timeout ?? 10000;
 
     try {
-        const url = `${BASE_URL}/user/${username}/`;
+        const url = `${BASE_URL}/profile/${username}`;
         const html = await fetchHTML(url, timeout);
-        const $ = cheerio.load(html);
 
-        // Check if user exists
-        if ($('h1:contains("404")').length > 0 || html.includes('User not found')) {
-            throw new UserNotFoundError(PLATFORM, username);
+        // Check for userData presence
+        if (!html.match(/\\?"userData\\?":/)) {
+            if (html.includes('404') || html.includes('User not found')) {
+                throw new UserNotFoundError(PLATFORM, username);
+            }
+            // fallback: if no userData but page loaded, maybe structure changed?
+            // for now throw error to be safe
+            throw new PlatformError(PLATFORM, 'Failed to find user data in profile page');
         }
 
-        // Extract coding score
-        const scoreText = $('.score_card_value').first().text().trim();
-        const codingScore = parseInt(scoreText) || 0;
+        // Regex for fields (handling escaped quotes)
+        const scoreMatch = html.match(/\\?"score\\?":\s*(\d+)/);
+        const totalSolvedMatch = html.match(/\\?"total_problems_solved\\?":\s*(\d+)/);
+        const instituteRankMatch = html.match(/\\?"institute_rank\\?":\s*(\d+)/);
+        const avatarMatch = html.match(/\\?"profile_image_url\\?":\s*\\?"([^"\\]+)\\?"/);
+        const maxStreakMatch = html.match(/\\?"pod_solved_global_longest_streak\\?":\s*(\d+)/);
+        const currentStreakMatch = html.match(/\\?"pod_solved_current_streak\\?":\s*(\d+)/);
 
-        // Extract current streak
-        const currentStreakText = $('.streak_count').first().text().trim();
-        const currentStreak = parseInt(currentStreakText) || 0;
-
-        // Extract max streak
-        const maxStreakText = $('.max_streak').text().trim() || currentStreakText;
-        const maxStreak = parseInt(maxStreakText) || currentStreak;
-
-        // Extract solved problems by difficulty
-        const problemStats = $('.problems_solved .problems_solved_section');
-        let totalSolved = 0;
-        let easy = 0;
-        let medium = 0;
-        let hard = 0;
-
-        problemStats.each((_, elem) => {
-            const label = $(elem).find('.difficulty_label').text().toLowerCase();
-            const count = parseInt($(elem).find('.solved_count').text().trim()) || 0;
-
-            if (label.includes('easy')) easy = count;
-            else if (label.includes('medium')) medium = count;
-            else if (label.includes('hard')) hard = count;
-
-            totalSolved += count;
-        });
-
-        // Extract institute rank (if available)
-        const instituteRankText = $('.institute_rank_value').text().trim();
-        const instituteRank = instituteRankText ? parseInt(instituteRankText) : undefined;
-
-        // Extract avatar
-        const avatarSrc = $('.profile_pic img').attr('src') || '';
-        const avatar = avatarSrc.startsWith('//') ? `https:${avatarSrc}` :
-            avatarSrc.startsWith('/') ? `${BASE_URL}${avatarSrc}` : avatarSrc;
+        const codingScore = scoreMatch ? parseInt(scoreMatch[1]) : 0;
+        const totalSolved = totalSolvedMatch ? parseInt(totalSolvedMatch[1]) : 0;
+        const instituteRank = instituteRankMatch ? parseInt(instituteRankMatch[1]) : undefined;
+        // unescape avatar url if needed (usually just removal of backslashes)
+        let avatarUrl = avatarMatch ? avatarMatch[1].replace(/\\/g, '') : '';
+        const avatar = avatarUrl || `${BASE_URL}/img/default-profile.png`;
+        const maxStreak = maxStreakMatch ? parseInt(maxStreakMatch[1]) : 0;
+        const currentStreak = currentStreakMatch ? parseInt(currentStreakMatch[1]) : 0;
 
         const stats: GfGStats = {
             username,
             codingScore,
             solved: {
                 total: totalSolved,
-                easy,
-                medium,
-                hard,
+                easy: 0, // Not available in SSR HTML
+                medium: 0, // Not available in SSR HTML
+                hard: 0, // Not available in SSR HTML
             },
             currentStreak,
             maxStreak,
             instituteRank,
-            avatar: avatar || `${BASE_URL}/img/default-profile.png`,
+            avatar,
         };
 
         return { success: true, data: stats };
@@ -95,7 +77,7 @@ export async function getGfGRaw(
     const timeout = options.timeout ?? 10000;
 
     try {
-        const url = `${BASE_URL}/user/${username}/`;
+        const url = `${BASE_URL}/profile/${username}`;
         const html = await fetchHTML(url, timeout);
 
         if (html.includes('404') || html.includes('User not found')) {

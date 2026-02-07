@@ -266,13 +266,17 @@ async function getCodeChef(username, options = {}) {
     }
     const ratingText = $(".rating-number").first().text().trim();
     const rating = parseInt(ratingText) || 0;
-    const maxRatingText = $(".rating-header .small").text();
-    const maxRatingMatch = maxRatingText.match(/Highest Rating (\d+)/);
+    const ratingHeader = $(".rating-header").text();
+    const maxRatingMatch = ratingHeader.match(/Highest Rating\s*(\d+)/i);
     const maxRating = maxRatingMatch ? parseInt(maxRatingMatch[1]) : rating;
     const starsText = $(".rating-star").find("span").length;
     const stars = starsText || 0;
-    const solvedText = $("section.rating-data-section.problems-solved h3").text().trim();
-    const solved = parseInt(solvedText) || 0;
+    const solvedHeader = $('h3:contains("Total Problems Solved")').text();
+    const solvedMatch = solvedHeader.match(/Total Problems Solved:\s*(\d+)/i);
+    const solved = solvedMatch ? parseInt(solvedMatch[1]) : 0;
+    const contestsHeader = $('h3:contains("Contests")').text();
+    const contestsMatch = contestsHeader.match(/Contests\s*\((\d+)\)/i);
+    const contests = contestsMatch ? parseInt(contestsMatch[1]) : 0;
     const globalRankText = $(".rating-ranks ul li").first().find(".rank").text().trim();
     const globalRank = parseInt(globalRankText.replace(/,/g, "")) || void 0;
     const countryRankText = $(".rating-ranks ul li").eq(1).find(".rank").text().trim();
@@ -285,6 +289,7 @@ async function getCodeChef(username, options = {}) {
       maxRating,
       stars,
       solved,
+      contests,
       globalRank,
       countryRank,
       avatar: avatar || `${BASE_URL}/misc/default-profile-image.png`
@@ -317,54 +322,48 @@ async function getCodeChefRaw(username, options = {}) {
 }
 
 // src/platforms/gfg.ts
-import * as cheerio2 from "cheerio";
 var PLATFORM4 = "GeeksforGeeks";
 var BASE_URL2 = "https://www.geeksforgeeks.org";
 async function getGfG(username, options = {}) {
   const timeout = options.timeout ?? 1e4;
   try {
-    const url = `${BASE_URL2}/user/${username}/`;
+    const url = `${BASE_URL2}/profile/${username}`;
     const html = await fetchHTML(url, timeout);
-    const $ = cheerio2.load(html);
-    if ($('h1:contains("404")').length > 0 || html.includes("User not found")) {
-      throw new UserNotFoundError(PLATFORM4, username);
+    if (!html.match(/\\?"userData\\?":/)) {
+      if (html.includes("404") || html.includes("User not found")) {
+        throw new UserNotFoundError(PLATFORM4, username);
+      }
+      throw new PlatformError(PLATFORM4, "Failed to find user data in profile page");
     }
-    const scoreText = $(".score_card_value").first().text().trim();
-    const codingScore = parseInt(scoreText) || 0;
-    const currentStreakText = $(".streak_count").first().text().trim();
-    const currentStreak = parseInt(currentStreakText) || 0;
-    const maxStreakText = $(".max_streak").text().trim() || currentStreakText;
-    const maxStreak = parseInt(maxStreakText) || currentStreak;
-    const problemStats = $(".problems_solved .problems_solved_section");
-    let totalSolved = 0;
-    let easy = 0;
-    let medium = 0;
-    let hard = 0;
-    problemStats.each((_, elem) => {
-      const label = $(elem).find(".difficulty_label").text().toLowerCase();
-      const count = parseInt($(elem).find(".solved_count").text().trim()) || 0;
-      if (label.includes("easy")) easy = count;
-      else if (label.includes("medium")) medium = count;
-      else if (label.includes("hard")) hard = count;
-      totalSolved += count;
-    });
-    const instituteRankText = $(".institute_rank_value").text().trim();
-    const instituteRank = instituteRankText ? parseInt(instituteRankText) : void 0;
-    const avatarSrc = $(".profile_pic img").attr("src") || "";
-    const avatar = avatarSrc.startsWith("//") ? `https:${avatarSrc}` : avatarSrc.startsWith("/") ? `${BASE_URL2}${avatarSrc}` : avatarSrc;
+    const scoreMatch = html.match(/\\?"score\\?":\s*(\d+)/);
+    const totalSolvedMatch = html.match(/\\?"total_problems_solved\\?":\s*(\d+)/);
+    const instituteRankMatch = html.match(/\\?"institute_rank\\?":\s*(\d+)/);
+    const avatarMatch = html.match(/\\?"profile_image_url\\?":\s*\\?"([^"\\]+)\\?"/);
+    const maxStreakMatch = html.match(/\\?"pod_solved_global_longest_streak\\?":\s*(\d+)/);
+    const currentStreakMatch = html.match(/\\?"pod_solved_current_streak\\?":\s*(\d+)/);
+    const codingScore = scoreMatch ? parseInt(scoreMatch[1]) : 0;
+    const totalSolved = totalSolvedMatch ? parseInt(totalSolvedMatch[1]) : 0;
+    const instituteRank = instituteRankMatch ? parseInt(instituteRankMatch[1]) : void 0;
+    let avatarUrl = avatarMatch ? avatarMatch[1].replace(/\\/g, "") : "";
+    const avatar = avatarUrl || `${BASE_URL2}/img/default-profile.png`;
+    const maxStreak = maxStreakMatch ? parseInt(maxStreakMatch[1]) : 0;
+    const currentStreak = currentStreakMatch ? parseInt(currentStreakMatch[1]) : 0;
     const stats = {
       username,
       codingScore,
       solved: {
         total: totalSolved,
-        easy,
-        medium,
-        hard
+        easy: 0,
+        // Not available in SSR HTML
+        medium: 0,
+        // Not available in SSR HTML
+        hard: 0
+        // Not available in SSR HTML
       },
       currentStreak,
       maxStreak,
       instituteRank,
-      avatar: avatar || `${BASE_URL2}/img/default-profile.png`
+      avatar
     };
     return { success: true, data: stats };
   } catch (error) {
@@ -378,7 +377,7 @@ async function getGfG(username, options = {}) {
 async function getGfGRaw(username, options = {}) {
   const timeout = options.timeout ?? 1e4;
   try {
-    const url = `${BASE_URL2}/user/${username}/`;
+    const url = `${BASE_URL2}/profile/${username}`;
     const html = await fetchHTML(url, timeout);
     if (html.includes("404") || html.includes("User not found")) {
       throw new UserNotFoundError(PLATFORM4, username);

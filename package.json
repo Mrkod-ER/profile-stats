@@ -1,12 +1,12 @@
 {
   "name": "profile-stats",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Fetch competitive programming stats from Codeforces, LeetCode, CodeChef, and GeeksforGeeks",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
   "bin": {
-    "cpstat": "./dist/cli/index.js"
+    "cpstat": "dist/cli/index.js"
   },
   "exports": {
     ".": {
@@ -45,6 +45,7 @@
   },
   "devDependencies": {
     "@types/node": "^25.2.1",
+    "ts-node": "^10.9.2",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   }
