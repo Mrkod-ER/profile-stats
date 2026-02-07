@@ -6,6 +6,7 @@ import type {
     CodeforcesStats,
     CodeforcesUserResponse,
     CodeforcesSubmissionsResponse,
+    CodeforcesRatingResponse,
     PlatformResult,
     FetchOptions,
 } from '../types/index.js';
@@ -48,6 +49,19 @@ export async function getCodeforces(
             });
         }
 
+        // Fetch rating history to count contests
+        let contestsCount = 0;
+        try {
+            const ratingUrl = `${API_BASE}/user.rating?handle=${username}`;
+            const ratingResponse = await fetchJSON<CodeforcesRatingResponse>(ratingUrl, timeout);
+            if (ratingResponse.status === 'OK') {
+                contestsCount = ratingResponse.result.length;
+            }
+        } catch {
+            // Rating history might not exist for new users
+            contestsCount = 0;
+        }
+
         const stats: CodeforcesStats = {
             username: user.handle,
             rating: user.rating ?? 0,
@@ -55,6 +69,8 @@ export async function getCodeforces(
             rank: user.rank ?? 'unrated',
             maxRank: user.maxRank ?? 'unrated',
             solved: solvedProblems.size,
+            contestsCount,
+            contribution: user.contribution ?? 0,
             avatar: user.avatar.startsWith('//') ? `https:${user.avatar}` : user.avatar,
         };
 

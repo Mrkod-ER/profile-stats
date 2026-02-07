@@ -7,6 +7,8 @@ export interface CodeforcesStats {
     rank: string;
     maxRank: string;
     solved: number;
+    contestsCount: number;
+    contribution: number;
     avatar: string;
 }
 
@@ -22,6 +24,7 @@ export interface CodeforcesUser {
     maxRating?: number;
     rank?: string;
     maxRank?: string;
+    contribution?: number;
     avatar: string;
     titlePhoto: string;
 }
@@ -40,4 +43,17 @@ export interface CodeforcesSubmission {
         name: string;
     };
     verdict: string;
+}
+
+export interface CodeforcesRatingResponse {
+    status: string;
+    result: CodeforcesRatingChange[];
+}
+
+export interface CodeforcesRatingChange {
+    contestId: number;
+    contestName: string;
+    rank: number;
+    oldRating: number;
+    newRating: number;
 }

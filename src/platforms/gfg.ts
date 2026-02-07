@@ -30,6 +30,7 @@ export async function getGfG(
 
         // Regex for fields (handling escaped quotes)
         const scoreMatch = html.match(/\\?"score\\?":\s*(\d+)/);
+        const monthlyScoreMatch = html.match(/\\?"monthly_score\\?":\s*(\d+)/);
         const totalSolvedMatch = html.match(/\\?"total_problems_solved\\?":\s*(\d+)/);
         const instituteRankMatch = html.match(/\\?"institute_rank\\?":\s*(\d+)/);
         const avatarMatch = html.match(/\\?"profile_image_url\\?":\s*\\?"([^"\\]+)\\?"/);
@@ -37,6 +38,7 @@ export async function getGfG(
         const currentStreakMatch = html.match(/\\?"pod_solved_current_streak\\?":\s*(\d+)/);
 
         const codingScore = scoreMatch ? parseInt(scoreMatch[1]) : 0;
+        const monthlyScore = monthlyScoreMatch ? parseInt(monthlyScoreMatch[1]) : 0;
         const totalSolved = totalSolvedMatch ? parseInt(totalSolvedMatch[1]) : 0;
         const instituteRank = instituteRankMatch ? parseInt(instituteRankMatch[1]) : undefined;
         // unescape avatar url if needed (usually just removal of backslashes)
@@ -48,6 +50,7 @@ export async function getGfG(
         const stats: GfGStats = {
             username,
             codingScore,
+            monthlyScore,
             solved: {
                 total: totalSolved,
                 easy: 0, // Not available in SSR HTML

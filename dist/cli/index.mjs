@@ -81,6 +81,16 @@ async function getCodeforces(username, options2 = {}) {
         }
       });
     }
+    let contestsCount = 0;
+    try {
+      const ratingUrl = `${API_BASE}/user.rating?handle=${username}`;
+      const ratingResponse = await fetchJSON(ratingUrl, timeout);
+      if (ratingResponse.status === "OK") {
+        contestsCount = ratingResponse.result.length;
+      }
+    } catch {
+      contestsCount = 0;
+    }
     const stats = {
       username: user.handle,
       rating: user.rating ?? 0,
@@ -88,6 +98,8 @@ async function getCodeforces(username, options2 = {}) {
       rank: user.rank ?? "unrated",
       maxRank: user.maxRank ?? "unrated",
       solved: solvedProblems.size,
+      contestsCount,
+      contribution: user.contribution ?? 0,
       avatar: user.avatar.startsWith("//") ? `https:${user.avatar}` : user.avatar
     };
     return { success: true, data: stats };
@@ -262,12 +274,14 @@ async function getGfG(username, options2 = {}) {
       throw new PlatformError(PLATFORM4, "Failed to find user data in profile page");
     }
     const scoreMatch = html.match(/\\?"score\\?":\s*(\d+)/);
+    const monthlyScoreMatch = html.match(/\\?"monthly_score\\?":\s*(\d+)/);
     const totalSolvedMatch = html.match(/\\?"total_problems_solved\\?":\s*(\d+)/);
     const instituteRankMatch = html.match(/\\?"institute_rank\\?":\s*(\d+)/);
     const avatarMatch = html.match(/\\?"profile_image_url\\?":\s*\\?"([^"\\]+)\\?"/);
     const maxStreakMatch = html.match(/\\?"pod_solved_global_longest_streak\\?":\s*(\d+)/);
     const currentStreakMatch = html.match(/\\?"pod_solved_current_streak\\?":\s*(\d+)/);
     const codingScore = scoreMatch ? parseInt(scoreMatch[1]) : 0;
+    const monthlyScore = monthlyScoreMatch ? parseInt(monthlyScoreMatch[1]) : 0;
     const totalSolved = totalSolvedMatch ? parseInt(totalSolvedMatch[1]) : 0;
     const instituteRank = instituteRankMatch ? parseInt(instituteRankMatch[1]) : void 0;
     let avatarUrl = avatarMatch ? avatarMatch[1].replace(/\\/g, "") : "";
@@ -277,6 +291,7 @@ async function getGfG(username, options2 = {}) {
     const stats = {
       username,
       codingScore,
+      monthlyScore,
       solved: {
         total: totalSolved,
         easy: 0,

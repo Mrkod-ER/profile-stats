@@ -22,6 +22,8 @@ interface CodeforcesStats {
     rank: string;
     maxRank: string;
     solved: number;
+    contestsCount: number;
+    contribution: number;
     avatar: string;
 }
 interface CodeforcesUserResponse {
@@ -34,6 +36,7 @@ interface CodeforcesUser {
     maxRating?: number;
     rank?: string;
     maxRank?: string;
+    contribution?: number;
     avatar: string;
     titlePhoto: string;
 }
@@ -51,6 +54,17 @@ interface CodeforcesSubmission {
     };
     verdict: string;
 }
+interface CodeforcesRatingResponse {
+    status: string;
+    result: CodeforcesRatingChange[];
+}
+interface CodeforcesRatingChange {
+    contestId: number;
+    contestName: string;
+    rank: number;
+    oldRating: number;
+    newRating: number;
+}
 
 interface LeetCodeStats {
     username: string;
@@ -64,6 +78,7 @@ interface LeetCodeStats {
     contestRating?: number;
     contestRanking?: number;
     contestsAttended?: number;
+    acceptanceRate?: number;
     avatar: string;
 }
 interface LeetCodeUserProfile {
@@ -105,6 +120,7 @@ interface CodeChefStats {
 interface GfGStats {
     username: string;
     codingScore: number;
+    monthlyScore: number;
     solved: {
         total: number;
         easy: number;
@@ -143,4 +159,4 @@ interface AllStats {
  */
 declare function getAllStats(handles: UserHandles, options?: FetchOptions): Promise<AllStats>;
 
-export { type AllStats, type CodeChefStats, type CodeforcesStats, type CodeforcesSubmission, type CodeforcesSubmissionsResponse, type CodeforcesUser, type CodeforcesUserResponse, type FetchOptions, type GfGStats, type LeetCodeContestRanking, type LeetCodeStats, type LeetCodeUserProfile, type PlatformResult, type UserHandles, getAllStats, getCodeChef, getCodeChefRaw, getCodeforces, getCodeforcesRaw, getGfG, getGfGRaw, getLeetCode, getLeetCodeRaw };
+export { type AllStats, type CodeChefStats, type CodeforcesRatingChange, type CodeforcesRatingResponse, type CodeforcesStats, type CodeforcesSubmission, type CodeforcesSubmissionsResponse, type CodeforcesUser, type CodeforcesUserResponse, type FetchOptions, type GfGStats, type LeetCodeContestRanking, type LeetCodeStats, type LeetCodeUserProfile, type PlatformResult, type UserHandles, getAllStats, getCodeChef, getCodeChefRaw, getCodeforces, getCodeforcesRaw, getGfG, getGfGRaw, getLeetCode, getLeetCodeRaw };

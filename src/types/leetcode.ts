@@ -12,6 +12,7 @@ export interface LeetCodeStats {
     contestRating?: number;
     contestRanking?: number;
     contestsAttended?: number;
+    acceptanceRate?: number;
     avatar: string;
 }
 
